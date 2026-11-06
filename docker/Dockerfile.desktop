@@ -74,7 +74,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 libegl1 libgles2 libgl1-mesa-dri \
         fonts-dejavu-core fonts-liberation fonts-noto-core \
         fonts-noto-color-emoji fontconfig tzdata \
-        ca-certificates curl python3 python3-pip ffmpeg aria2 xdg-utils \
+        ca-certificates curl unzip python3 python3-pip ffmpeg aria2 xdg-utils \
         tini gosu \
     && rm -rf /var/lib/apt/lists/*
 
@@ -85,7 +85,13 @@ RUN curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_
     && chmod 0755 /usr/local/bin/yt-dlp
 
 # yt-dlp needs an external JavaScript runtime for the YouTube player.
-RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
+# Installed straight from the release asset: the shell installer additionally
+# requires an interactive-looking PATH setup and a working `unzip`.
+RUN curl -fsSL https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip \
+        -o /tmp/deno.zip \
+    && unzip -q /tmp/deno.zip -d /usr/local/bin \
+    && rm -f /tmp/deno.zip \
+    && deno --version
 
 # gallery-dl is a hard dependency for the image/board downloaders.
 RUN pip3 install --break-system-packages --no-cache-dir gallery-dl
