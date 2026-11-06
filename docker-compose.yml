@@ -1,0 +1,44 @@
+# Local / single-host stack for OmniGet in a browser.
+# Copy docker/env.example to .env before `docker compose up -d`.
+name: omniget
+
+services:
+  omniget:
+    image: ${OMNIGET_IMAGE:-ghcr.io/anub7com/omniget:latest}
+    ports:
+      - "${OMNIGET_PORT:-6080}:6080"
+    environment:
+      OMNIGET_DATA_DIR: /data
+      VNC_PASSWORD: ${VNC_PASSWORD:?set VNC_PASSWORD in .env}
+      RESOLUTION: ${RESOLUTION:-1440x900x24}
+      TZ: ${TZ:-Africa/Cairo}
+      LANG: C.UTF-8
+    volumes:
+      - omniget-data:/data
+      - omniget-downloads:/home/omniget/Downloads
+    # WebKitGTK allocates shared memory for its web process.
+    shm_size: "1gb"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:6080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  # Optional: browse what OmniGet saved without driving the desktop UI.
+  # First login is admin / adminadmin — change it immediately, see docker/README.md.
+  files:
+    image: filebrowser/filebrowser:latest
+    ports:
+      - "${FILES_PORT:-8080}:80"
+    command: ["-r", "/srv", "-d", "/database/filebrowser.db", "-a", "0.0.0.0", "-p", "80"]
+    volumes:
+      - omniget-downloads:/srv
+      - filebrowser-db:/database
+    restart: unless-stopped
+
+volumes:
+  omniget-data:
+  omniget-downloads:
+  filebrowser-db:

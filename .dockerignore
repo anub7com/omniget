@@ -1,0 +1,37 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker build context filter for the OmniGet images.
+# Keeping this small matters: the Rust builder downloads the whole workspace
+# and an accidental `src-tauri/target` copy is several GB.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# VCS / CI
+.git
+.gitattributes
+.gitignore
+.github
+
+# Frontend dependencies and build output (the frontend stage produces its own)
+node_modules
+build
+.svelte-kit
+package
+
+# Rust build artefacts
+src-tauri/target
+src-tauri/gen
+
+# Website / documentation / packaging — not part of the app binary
+assets
+docs
+flatpak
+**/*.md
+!docker/README.md
+
+# Local environment files and editor state
+.env
+.env.*
+!.env.example
+.vscode
+.idea
+.DS_Store
+Thumbs.db
