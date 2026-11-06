@@ -106,6 +106,9 @@ RUN useradd --create-home --uid 1000 --shell /bin/bash omniget \
     && chown -R omniget:omniget /data /home/omniget
 
 EXPOSE 6080
+# Fallback working directory: if `dirs::download_dir()` cannot resolve
+# `~/Downloads`, the app's default output path is `.`, so it must not be `/`.
+WORKDIR /home/omniget
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
     CMD curl -fsS http://127.0.0.1:6080/ >/dev/null || exit 1
 
