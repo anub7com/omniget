@@ -35,6 +35,10 @@ VNC_PASSWORD="${VNC_PASSWORD:-omniget}"
 VNC_PORT="${VNC_PORT:-5900}"
 WEB_PORT="${WEB_PORT:-6080}"
 
+# A fresh /tmp (tmpfs) starts without the X11 socket directory; Xvfb needs it.
+mkdir -p /tmp/.X11-unix
+chmod 1777 /tmp/.X11-unix 2>/dev/null || true
+
 # A container restart keeps /tmp. If the previous Xvfb died without cleaning up
 # (EasyPanel restarts, app crash), its lock makes the next start fail with
 # "Server is already active for display 99" and the container loops forever.
