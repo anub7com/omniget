@@ -18,9 +18,8 @@ export NO_AT_BRIDGE="${NO_AT_BRIDGE:-1}"
 
 # WebKitGTK sandboxes its web process with bubblewrap, which needs user
 # namespaces that most container runtimes restrict. The app already disables
-# the DMABUF/compositing paths on Linux; these two keep the web process alive.
+# the DMABUF/compositing paths on Linux; this keeps the web process alive.
 export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS="${WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS:-1}"
-export WEBKIT_FORCE_SANDBOX="${WEBKIT_FORCE_SANDBOX:-0}"
 
 if [ "$(id -u)" = "0" ]; then
   mkdir -p "$OMNIGET_DATA_DIR" "$HOME/Downloads"
@@ -35,6 +34,16 @@ RESOLUTION="${RESOLUTION:-1440x900x24}"
 VNC_PASSWORD="${VNC_PASSWORD:-omniget}"
 VNC_PORT="${VNC_PORT:-5900}"
 WEB_PORT="${WEB_PORT:-6080}"
+
+# A container restart keeps /tmp. If the previous Xvfb died without cleaning up
+# (EasyPanel restarts, app crash), its lock makes the next start fail with
+# "Server is already active for display 99" and the container loops forever.
+# Remove it only when no X server is actually answering on that display.
+display_num="${DISPLAY#:}"
+if [ -e "/tmp/.X${display_num}-lock" ] && ! xdpyinfo -display "$DISPLAY" >/dev/null 2>&1; then
+  echo "[omniget] removing stale /tmp/.X${display_num}-lock"
+  rm -f "/tmp/.X${display_num}-lock" "/tmp/.X11-unix/X${display_num}"
+fi
 
 echo "[omniget] starting Xvfb on ${DISPLAY} (${RESOLUTION})"
 Xvfb "$DISPLAY" -screen 0 "$RESOLUTION" -nolisten tcp >/tmp/xvfb.log 2>&1 &

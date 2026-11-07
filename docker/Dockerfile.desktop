@@ -75,7 +75,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         fonts-dejavu-core fonts-liberation fonts-noto-core \
         fonts-noto-color-emoji fontconfig tzdata \
         ca-certificates curl unzip python3 python3-pip ffmpeg aria2 xdg-utils \
-        tini gosu \
+        desktop-file-utils tini gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # yt-dlp standalone binary: the app prefers a managed copy in $DATA/bin but

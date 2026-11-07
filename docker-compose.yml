@@ -16,6 +16,9 @@ services:
     volumes:
       - omniget-data:/data
       - omniget-downloads:/home/omniget/Downloads
+    # A fresh /tmp on every container start: no stale X locks after restarts.
+    tmpfs:
+      - /tmp
     # WebKitGTK allocates shared memory for its web process.
     shm_size: "1gb"
     healthcheck:
